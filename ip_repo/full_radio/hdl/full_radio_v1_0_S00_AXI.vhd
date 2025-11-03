@@ -348,14 +348,14 @@ begin
 	              if ( S_AXI_WSTRB(byte_index) = '1' ) then
 	                -- Respective byte enables are asserted as per write strobes                   
 	                -- slave registor 3
---	                slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+	                slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
 	              end if;
 	            end loop;
 	          when others =>
 	            slv_reg0 <= slv_reg0;
 	            slv_reg1 <= slv_reg1;
 	            slv_reg2 <= slv_reg2;
---	            slv_reg3 <= slv_reg3;
+	            slv_reg3 <= slv_reg3;
 	        end case;
 	      end if;
 	    end if;
@@ -456,7 +456,7 @@ begin
 	      when b"10" =>
 	        reg_data_out <= slv_reg2;
 	      when b"11" =>
-	        reg_data_out <= slv_reg3;
+	        reg_data_out <= clock_counter;
 	      when others =>
 	        reg_data_out  <= (others => '0');
 	    end case;
@@ -576,8 +576,6 @@ begin
             end if;
         end if;
     end process;
-
-    slv_reg3 <= clock_counter;
   
   -- User logic ends
 
