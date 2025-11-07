@@ -52,28 +52,42 @@ void print_benchmark(volatile unsigned int *periph_base)
     // the below code does a little benchmark, reading from the peripheral a bunch 
     // of times, and seeing how many clocks it takes.  You can use this information
     // to get an idea of how fast you can generally read from an axi-lite slave device
+    
     unsigned int start_time;
     unsigned int stop_time;
-    start_time = *(periph_base+RADIO_TUNER_TIMER_REG_OFFSET);
-    for (int i=0;i<2048;i++)
-        stop_time = *(periph_base+RADIO_TUNER_TIMER_REG_OFFSET);
-    printf("Elapsed time in clocks = %u\n",stop_time-start_time);
-    float throughput=0; 
+
+    const int axi_data_width  = 32; // bits
+    const int number_of_reads = 2048;
+    const int clock_period    = 8; // ns
+    
+    start_time = *(periph_base + RADIO_TUNER_TIMER_REG_OFFSET);
+    
+    // read 32 bits 2048 times
+    for (int i=0; i<number_of_reads; i++)
+        stop_time = *(periph_base + RADIO_TUNER_TIMER_REG_OFFSET);
+    
     // please insert your code here for calculate the actual throughput in Mbytes/second
     // how much data was transferred? How long did it take?
-    unsigned int bytes_transferred = 0; // change obviously
-    float time_spent = 1; // change obviously
-    printf("You transferred %f bytes of data in %f seconds\n",bytes_transferred,time_spent);
-    printf("Measured Transfer throughput = %f Mbytes/sec\n",throughput);
+
+    unsigned int time_spent        = (stop_time - start_time); // clocks
+    unsigned int time_spent_ns     = time_spent * clock_period; // ns
+    float        time_spent_s      = (float) time_spent_ns * 1e-9; // sec
+    
+    unsigned int bytes_transferred     = (axi_data_width / 8) * number_of_reads; // bytes
+    float        megabytes_transferred = (float) bytes_transferred / (1024 * 1024); // megabytes
+    float        throughput            = megabytes_transferred / time_spent_s; // megabytes/s
+
+    printf("Elapsed time in clocks = %u\n", time_spent);
+    printf("You transferred %d bytes of data in %f seconds\n", bytes_transferred, time_spent_s);
+    printf("Measured Transfer throughput = %f Mbytes/sec\n", throughput);
 }
 
 int main()
 {
-
-// first, get a pointer to the peripheral base address using /dev/mem and the function mmap
+    // first, get a pointer to the peripheral base address using /dev/mem and the function mmap
     volatile unsigned int *my_periph = get_a_pointer(RADIO_PERIPH_ADDRESS);	
 
-    printf("\r\n\r\n\r\nLab 6 YOURNAME - Custom Peripheral Demonstration\n\r");
+    printf("\r\n\r\n\r\nLab 10 Ardit Duhanxhiu - Custom Peripheral Demonstration\n\r");
     *(my_periph+RADIO_TUNER_CONTROL_REG_OFFSET) = 0; // make sure radio isn't in reset
     printf("Tuning Radio to 30MHz\n\r");
     radioTuner_tuneRadio(my_periph,30e6);
